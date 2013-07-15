@@ -1,1 +1,412 @@
-node_modules
+这是一个自定义的Dialog类，用以实现dialog的接口及其样式的自定义
+package see.ilifeactivity;
+import ilife.see.R;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+public class Num_Dialog extends AlertDialog implements OnClickListener{
+  
+	private Button ok,cancel;
+	private myDialogListener listener;
+	public Num_Dialog(Context context, int theme ,myDialogListener listener) {
+	    super(context, theme);
+	    this.listener = listener;
+	}
+	public interface myDialogListener{
+		public void onClik(View View);
+	}
+	
+	
+	public void onClick(View v) { 
+        listener.onClik(v); 
+    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.number_limit);
+		init();
+	}
+	private void init() {
+		ok=(Button)findViewById(R.id.ok_btn);
+		cancel=(Button)findViewById(R.id.cancel_btn);
+		ok.setOnClickListener(this);
+		cancel.setOnClickListener(this);
+		// TODO Auto-generated method stub
+		
+	}
+}
+
+
+下面的类是引用上面的类
+实现dialog的功能
+package see.ilifeactivity;
+
+import ilife.see.R;
+import see.ilifeactivity.MyDialog.OnDialogClickListener;
+import see.ilifeactivity.Num_Dialog.myDialogListener;
+import see.mainindex.ui.activity.SlidingActivity;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+public class OrganizeActivity extends Activity implements OnDialogClickListener,myDialogListener
+{
+  private Button finish_btn,back;
+	private ImageView organize_add_img;
+	private EditText act_name_et,act_time_et,act_address_et,act_type_et,act_number_et,act_info_et;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.organize_act);
+		init();
+	}
+
+	private void init() {
+		// TODO Auto-generated method stub
+		findViews();
+		finish_btn.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent it = new Intent(OrganizeActivity.this,SlidingActivity.class);
+				startActivity(it);
+			}
+		});
+
+		organize_add_img.setOnClickListener(new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+		
+			MyDialog dialog = new MyDialog(OrganizeActivity.this, R.style.MyDialog);
+			 				             
+			dialog.setContentView(R.layout.photo_dialog);  
+			dialog.setCanceledOnTouchOutside(true);
+			
+			dialog.setOnDialogClickListener(OrganizeActivity.this);
+			
+			//设置点击Dialog外部任意区域关闭Dialog
+			dialog.show();  
+			
+		}
+	});
+		act_number_et.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			
+        //引用上面的类
+				MyDialog dialog = new MyDialog(OrganizeActivity.this, R.style.MyDialog);					 				             
+				dialog.setContentView(R.layout.number_limit);  
+				dialog.setCanceledOnTouchOutside(true);
+				
+				dialog.setOnDialogClickListener(OrganizeActivity.this);
+				
+				//设置点击Dialog外部任意区域关闭Dialog
+				dialog.show();  
+				
+			}
+		});
+		act_type_et=(EditText)findViewById(R.id.act_type_et);
+		    act_type_et.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					final CharSequence[] items = { "娱乐兴趣", "交友联谊", "学术社团","其他" };
+
+					// 创建builder
+
+					AlertDialog.Builder builder = new AlertDialog.Builder(
+
+					OrganizeActivity.this);
+
+					builder.setTitle("请选择活动类型") // 标题
+
+					.setIcon(R.drawable.activity_icon) // icon
+
+					.setCancelable(false) // 不响应back按钮
+
+					.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+
+					@Override
+					
+					public void onClick(DialogInterface dialog, int which) {
+						
+					act_type_et.setText(items[which]);
+										    					
+					Toast.makeText(OrganizeActivity.this,
+					
+					"选择了" + items[which], Toast.LENGTH_SHORT)
+					
+					.show();
+					}
+					
+					});
+					
+					builder.setPositiveButton("ok", null);
+					
+					builder.setNegativeButton("cencel",null);
+
+					builder.create().show();
+					
+				}
+			});
+		    finish_btn=(Button)findViewById(R.id.finish_btn);
+		    finish_btn.setOnClickListener(new MyListener(this));
+		    act_number_et.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					Num_Dialog dialog=new Num_Dialog(OrganizeActivity.this,R.style.MyDialog,new myDialogListener(){
+
+						@Override
+						public void onClik(View v) {
+							// TODO Auto-generated method stub
+							switch(v.getId()){
+							case R.id.ok_btn:
+								Intent it=new Intent(OrganizeActivity.this,EditActivity.class);
+								startActivity(it);
+								break;
+							case R.id.cancel_btn:
+								break;
+							case R.id.num_limit_et:
+								break;
+							
+							}
+							
+						}
+						
+					});
+					
+				}
+			});
+		    
+	}
+	@Override
+  //实现dialog上的控件的点击事件
+	public void OnClick(View v) {
+		// TODO Auto-generated method stub
+		int id = v.getId();
+		switch(id)
+		{
+		case R.id.photographing:
+			Intent getImageByCamera = new Intent("android.media.action.IMAGE_CAPTURE");
+			startActivityForResult(getImageByCamera, 1);
+			break;
+		case R.id.local:
+			Intent getImage = new Intent(Intent.ACTION_GET_CONTENT);
+			getImage.addCategory(Intent.CATEGORY_OPENABLE);
+			getImage.setType("image/jpeg");
+			startActivityForResult(getImage, 0);
+			break;
+		case R.id.finish_btn:
+			
+		}
+		
+		
+	}
+	
+	
+	private void findViews(){
+		finish_btn = (Button)findViewById(R.id.finish_btn);
+		back = (Button)findViewById(R.id.back);
+		organize_add_img=(ImageView)findViewById(R.id.org_head_img);
+		act_name_et=(EditText)findViewById(R.id.act_name_et);
+		act_time_et=(EditText)findViewById(R.id.act_time_et);
+		act_address_et=(EditText)findViewById(R.id.act_address_et);
+		act_type_et=(EditText)findViewById(R.id.act_type_et);
+		act_number_et=(EditText)findViewById(R.id.num_limit_et);
+		act_info_et=(EditText)findViewById(R.id.act_info_et);
+		
+	}
+
+	@Override
+	public void onClik(View View) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}
+//该类为验证输入框是否为空，且有相应提示
+class MyListener extends java.lang.Object implements Button.OnClickListener  
+{  
+	Activity act;  
+  public MyListener(Activity act)  
+  {  
+      this.act = act;  
+  }  
+  private boolean ValidateEditText(int id, String name)  
+  {   EditText et=(EditText)act.findViewById(id);
+      String str=et.getText().toString();
+      if(id!=R.id.act_info_et){
+      if (isEmpty(str))  
+      {   
+	        new AlertDialog.Builder(act) 
+	        .setTitle("Android 提示") 
+	        .setMessage(name+"不能为空") 
+	        .show();
+          return false;  
+      }
+      return true;  
+      }
+      else{
+      	if (isEmpty(str)||tooLong(str))  
+          {   
+  	        new AlertDialog.Builder(act) 
+  	        .setTitle("Android 提示") 
+  	        .setMessage(name+"不能为空也不能多于150字") 
+  	        .show();
+              return false;  
+          }
+          return true; 
+      }
+  }  
+
+      
+	@Override
+  
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		if (!ValidateEditText(R.id.act_name_et, "用户名"))  
+          return;  
+      if (!ValidateEditText(R.id.act_time_et, "活动时间"))          	 
+          return;  
+      if (!ValidateEditText(R.id.act_address_et, "活动地点"))
+          return;  
+      if (!ValidateEditText(R.id.act_type_et, "活动性质"))       	
+          return;  
+      if (!ValidateEditText(R.id.num_limit_et, "活动人数上限"))     	
+          return;  
+      if (!ValidateEditText(R.id.act_info_et, "活动简介"))     	
+          return;  
+      
+      
+  }  
+	
+	//验证是否为空的方法
+  public  boolean isEmpty(String str) {
+
+      if (str == null || str.trim().length() == 0) {
+
+          return true;
+
+      } else {
+
+          return false;
+
+      }
+
+
+	}
+  //此方法为验证简介字数是否大于150字
+  public boolean tooLong(String str){
+  	if(str.trim().length()>150)
+  		
+  		return true;
+
+  	else
+  		
+  		return false;
+  	
+  }
+	
+}  
+
+
+
+下面是弹出的活动上限人数的dialog的布局文件
+number_limit.xml
+<?xml version="1.0" encoding="UTF-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+      
+
+        <TextView
+            android:id="@+id/num_limit_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="51dp"
+            android:text="活动人数上限"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+         <EditText
+             android:id="@+id/num_limit_et"
+             android:layout_width="210dp"
+             android:layout_height="wrap_content"
+             android:layout_alignParentLeft="true"
+             android:layout_alignParentRight="true"
+             android:hint="不能超过群组人数上限"
+             android:layout_below="@+id/num_limit_tv" />
+
+         <Button
+             android:id="@+id/ok_btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignLeft="@+id/num_limit_tv"
+             android:layout_below="@+id/num_limit_et"
+             android:layout_marginTop="16dp"
+             android:text="确定" />
+
+         <Button
+             android:id="@+id/cancel_btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignBaseline="@+id/ok_btn"
+             android:layout_alignBottom="@+id/ok_btn"
+             android:layout_marginLeft="24dp"
+             android:layout_toRightOf="@+id/num_limit_tv"
+             android:text="取消" />
+
+    </RelativeLayout>
+
+ 在 dialog样式的样式文件styles.xml中加入以下的代码
+ <style name="MyDialog" parent="@android:Theme.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item> 
+        <!-- //对话框无标题-->
+        <item name="android:windowBackground">@null</item>
+        <!-- //此对话框的背景  -->
+        <!-- 设置背景迁安透明 @color/transparent -->
+        <item name="android:windowIsFloating">true</item>
+        <!-- //对话框是否浮动-->
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- //对话框是否有遮盖-->
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+    <style name="Theme.Transparent" parent="android:Theme">
+        <item name="android:windowBackground">@null</item>
+        <!-- //此对话框的背景  -->
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- //对话框是否透明-->
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- //对话框是否有遮盖-->
+        <item name="android:windowNoTitle">true</item>
+        <!-- //对话框无标题-->
+        <item name="android:windowIsFloating">true</item>
+        <!-- //对话框是否浮动-->
+        <item name="android:backgroundDimEnabled">false</item>
+  </style>
+	 <style name="notitle" parent="android:Theme.Light">
+		<item name="android:windowNoTitle">true</item>
+		<item name="android:background">@color/transparent</item>
+		<item name="android:cacheColorHint">@color/transparent</item>e
+	</style>
